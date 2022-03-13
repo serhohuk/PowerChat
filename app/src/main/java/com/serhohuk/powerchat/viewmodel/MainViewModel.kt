@@ -1,7 +1,67 @@
 package com.serhohuk.powerchat.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.ktx.Firebase
+import com.serhohuk.powerchat.data.PowerAccount
+import com.serhohuk.powerchat.repository.AppRepository
 
-class MainViewModel() : ViewModel() {
+class MainViewModel(private val repository: AppRepository) : ViewModel() {
+
+    private val TAG = "viewModel_TAG"
+
+    private val db = FirebaseFirestore.getInstance()
+
+    fun getIsLoggedIn(key: String) : Boolean{
+        return repository.getIsLoggedIn(key)
+    }
+
+    fun saveBoolean(key: String, value: Boolean) : Boolean{
+        return repository.setBoolean(key,value)
+    }
+
+    fun saveString(key: String, value: String) : Boolean {
+        return repository.setString(key,value)
+    }
+
+    fun getAccountId() : String{
+        return repository.getAccountId()
+    }
+
+    fun getIsFirstLogin() : Boolean {
+        return repository.getIsFirstLogin()
+    }
+
+    fun getPowerAccount() : PowerAccount {
+        return repository.getPowerAccount()
+    }
+
+    fun <T>saveClass(key : String, value : T) {
+        repository.setClass(key,value)
+    }
+
+    fun saveAccountInFirebase(account : PowerAccount){
+        db.collection("Users")
+            .document(account.id!!)
+            .set(account, SetOptions.merge())
+            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully written!") }
+            .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+    }
+
+    fun getAccountByIdInFirebase(id : String){
+        db.collection("Users")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    Log.d(TAG, "${document.id} => ${document.data}")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting documents.", exception)
+            }
+    }
+
 
 }

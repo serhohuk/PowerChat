@@ -38,7 +38,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.serhohuk.powerchat.navigation.Navigation
 import com.serhohuk.powerchat.screen.SignInButton
-
+import com.serhohuk.powerchat.viewmodel.MainViewModel
 
 
 class MainActivity : ComponentActivity() {

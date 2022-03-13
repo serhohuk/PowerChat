@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -44,19 +43,23 @@ import com.google.android.gms.tasks.Task
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.serhohuk.powerchat.R
+import com.serhohuk.powerchat.data.SharedPrefsStorage.Companion.IS_LOGGED_IN_BOOL
 import com.serhohuk.powerchat.screen.destinations.DialogScreenDestination
-import com.serhohuk.powerchat.screen.destinations.LoginScreenDestination
 import com.serhohuk.powerchat.ui.theme.Shapes
+import com.serhohuk.powerchat.viewmodel.MainViewModel
+import org.koin.androidx.compose.viewModel
+
 
 @Destination(start = true)
 @Composable
 fun LoginScreen(navigator : DestinationsNavigator){
 
     val context = LocalContext.current
+    val viewModel : MainViewModel by viewModel<MainViewModel>()
     val isLoggedIn = remember{
-        mutableStateOf(false)
+        mutableStateOf(viewModel.getIsLoggedIn(IS_LOGGED_IN_BOOL))
     }
-    var account  = remember {
+    val account  = remember {
         mutableStateOf(GoogleSignInAccount.createDefault())
     }
 
@@ -74,8 +77,7 @@ fun LoginScreen(navigator : DestinationsNavigator){
                     } catch (e: ApiException) {
                         isLoggedIn.value = false
                     }
-
-
+                    viewModel.saveBoolean(IS_LOGGED_IN_BOOL, isLoggedIn.value)
                 }
             }
         }
