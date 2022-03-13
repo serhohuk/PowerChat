@@ -1,6 +1,8 @@
 package com.serhohuk.powerchat.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -13,6 +15,10 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
     private val TAG = "viewModel_TAG"
 
     private val db = FirebaseFirestore.getInstance()
+
+    private val _users : MutableLiveData<List<Map<String, Any>>> = MutableLiveData()
+    val users : LiveData<List<Map<String, Any>>> = _users
+
 
     fun getIsLoggedIn(key: String) : Boolean{
         return repository.getIsLoggedIn(key)
@@ -61,6 +67,24 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             .addOnFailureListener { exception ->
                 Log.w(TAG, "Error getting documents.", exception)
             }
+    }
+
+    fun getAccountsFromFirebase(query : String) {
+        val resultMap = mutableListOf<Map<String, Any>>()
+        if (query.isEmpty()) _users.value = resultMap
+        db.collection("Users").get()
+        .addOnSuccessListener { result ->
+            for (document in result) {
+                Log.d(TAG, "${document.id} => ${document.data}")
+                if (document.data["displayName"].toString().contains(query)){
+                    resultMap.add(document.data)
+                }
+            }
+            _users.value = resultMap
+        }
+        .addOnFailureListener { exception ->
+            Log.w(TAG, "Error getting documents.", exception)
+        }
     }
 
 
