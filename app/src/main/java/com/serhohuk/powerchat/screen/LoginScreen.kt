@@ -56,9 +56,10 @@ fun LoginScreen(navigator : DestinationsNavigator){
     val isLoggedIn = remember{
         mutableStateOf(false)
     }
-    var account : GoogleSignInAccount? = GoogleSignInAccount.createDefault()
-    val name = account?.displayName
-    val mail = account?.email
+    var account  = remember {
+        mutableStateOf(GoogleSignInAccount.createDefault())
+    }
+
 
     val startForResult =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -68,7 +69,7 @@ fun LoginScreen(navigator : DestinationsNavigator){
                     val task: Task<GoogleSignInAccount> =
                         GoogleSignIn.getSignedInAccountFromIntent(intent)
                     try {
-                        account = task.getResult(ApiException::class.java)
+                        account.value = task.getResult(ApiException::class.java)
                         isLoggedIn.value = true
                     } catch (e: ApiException) {
                         isLoggedIn.value = false
@@ -79,7 +80,7 @@ fun LoginScreen(navigator : DestinationsNavigator){
             }
         }
 
-    if (isLoggedIn.value) navigator.navigate(DialogScreenDestination)
+    if (isLoggedIn.value) navigator.navigate(DialogScreenDestination(account.value))
 
     Column(modifier = Modifier
         .fillMaxSize()
