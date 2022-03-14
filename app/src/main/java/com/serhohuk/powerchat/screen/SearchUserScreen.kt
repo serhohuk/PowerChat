@@ -32,11 +32,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.serhohuk.powerchat.R
 import com.serhohuk.powerchat.api.FirebaseUtils.BASE_GOOGLE_ACCOUNT_PHOTO_URL
+import com.serhohuk.powerchat.data.PowerAccount
+import com.serhohuk.powerchat.screen.destinations.MessageScreenDestination
 import com.serhohuk.powerchat.viewmodel.MainViewModel
 import com.skydoves.landscapist.coil.CoilImage
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalMaterialApi
 @Destination
 @Composable
 fun SearchUserScreen(navigator : DestinationsNavigator){
@@ -92,7 +95,7 @@ fun SearchUserScreen(navigator : DestinationsNavigator){
             shape = CutCornerShape(10.dp),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    viewModel.getAccountsFromFirebase(searchTextField.value)
+                    viewModel.getAccountsFromFirebase(searchTextField.value, viewModel.getAccountId())
 
                 })
             )
@@ -101,41 +104,60 @@ fun SearchUserScreen(navigator : DestinationsNavigator){
                 list?.let{
                     items(it){ value->
                         UserCard(
-                        imageUrl = BASE_GOOGLE_ACCOUNT_PHOTO_URL+value["photoUri"].toString(),
-                            name = value["displayName"].toString()
+                        navigator = navigator,
+                        account = convertToAccount(value)
                         )
                     }
                 }
             }
         }
 
-
     }
 
 }
 
-
+@ExperimentalMaterialApi
 @Composable
-fun UserCard(imageUrl : String, name : String){
+fun UserCard(navigator: DestinationsNavigator, account : PowerAccount){
     Card(modifier = Modifier
         .fillMaxWidth()
         .height(60.dp)
         .padding(horizontal = 15.dp),
-
+        onClick = {
+            navigator.navigate(MessageScreenDestination(account = account))
+        }
         ) {
-        Row(modifier= Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier= Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Card(
-                modifier = Modifier.size(48.dp).padding(horizontal = 10.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(48.dp),
                 shape = CircleShape,
                 elevation = 2.dp
             ) {
                 CoilImage(
                     modifier= Modifier.fillMaxSize(),
-                    imageModel = imageUrl,
+                    imageModel = BASE_GOOGLE_ACCOUNT_PHOTO_URL + account.photoUri,
                     contentScale = ContentScale.Crop
                 )
             }
-            Text(text = "Serhii Hryhorchuk", fontSize = 25.sp)
+            Text(text = account.givenName.toString(), fontSize = 25.sp)
         }
     }
+}
+
+fun convertToAccount(map : Map<String, Any>) : PowerAccount{
+    return PowerAccount(
+        displayName = map["displayName"].toString(),
+        familyName = map["familyName"].toString(),
+        givenName = map["givenName"].toString(),
+        email = map["email"].toString(),
+        idToken = map["idToken"].toString(),
+        id = map["id"].toString(),
+        photoUri = map["photoUri"].toString(),
+        authCode = map["authCode"].toString(),
+        isExpired = map["isExpired"] as Boolean?
+    )
 }

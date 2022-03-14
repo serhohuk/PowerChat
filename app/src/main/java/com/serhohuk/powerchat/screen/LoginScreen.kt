@@ -50,6 +50,7 @@ import com.serhohuk.powerchat.viewmodel.MainViewModel
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalMaterialApi
 @Destination(start = true)
 @Composable
 fun LoginScreen(navigator : DestinationsNavigator){

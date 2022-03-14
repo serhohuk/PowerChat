@@ -17,8 +17,6 @@ data class Message(
     @ServerTimestamp
     var deliveryTime: Date?=null,
     @ServerTimestamp
-    var seenTime: Date?=null,
-    @set:Exclude @get:Exclude
-    var chatUserId: String?=null)
+    var seenTime: Date?=null)
 
 data class TextMessage(val text: String)

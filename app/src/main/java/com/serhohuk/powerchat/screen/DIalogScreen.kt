@@ -29,6 +29,7 @@ import com.serhohuk.powerchat.viewmodel.MainViewModel
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalMaterialApi
 @Destination
 @Composable
 fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount){
@@ -100,6 +101,7 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun MyBottomBar(navigator: DestinationsNavigator,index : Int){
     val selectedIndex = remember{

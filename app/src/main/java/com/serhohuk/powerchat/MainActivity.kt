@@ -1,6 +1,7 @@
 package com.serhohuk.powerchat
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -41,6 +42,7 @@ import com.serhohuk.powerchat.screen.SignInButton
 import com.serhohuk.powerchat.viewmodel.MainViewModel
 
 
+@ExperimentalMaterialApi
 class MainActivity : ComponentActivity() {
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics

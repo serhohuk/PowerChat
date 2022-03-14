@@ -1,14 +1,17 @@
 package com.serhohuk.powerchat.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.serhohuk.powerchat.data.PowerAccount
 import com.serhohuk.powerchat.repository.AppRepository
+import java.util.*
 
 class MainViewModel(private val repository: AppRepository) : ViewModel() {
 
@@ -69,14 +72,19 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             }
     }
 
-    fun getAccountsFromFirebase(query : String) {
+    fun getAccountsFromFirebase(query : String, id: String) {
         val resultMap = mutableListOf<Map<String, Any>>()
         if (query.isEmpty()) _users.value = resultMap
         db.collection("Users").get()
         .addOnSuccessListener { result ->
             for (document in result) {
                 Log.d(TAG, "${document.id} => ${document.data}")
-                if (document.data["displayName"].toString().contains(query)){
+                val name = document.data["displayName"].toString()
+                    .lowercase()
+                val mQuery = query.lowercase().trim()
+                if (name.contains(mQuery)
+                    && document.data["id"].toString() != id
+                ){
                     resultMap.add(document.data)
                 }
             }
@@ -85,6 +93,10 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         .addOnFailureListener { exception ->
             Log.w(TAG, "Error getting documents.", exception)
         }
+    }
+
+    fun getDbCollection(collectionName : String) : CollectionReference{
+        return db.collection(collectionName)
     }
 
 
