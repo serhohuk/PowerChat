@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -42,6 +43,7 @@ import com.serhohuk.powerchat.screen.SignInButton
 import com.serhohuk.powerchat.viewmodel.MainViewModel
 
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 class MainActivity : ComponentActivity() {
 

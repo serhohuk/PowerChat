@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
@@ -50,6 +51,7 @@ import com.serhohuk.powerchat.viewmodel.MainViewModel
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Destination(start = true)
 @Composable
