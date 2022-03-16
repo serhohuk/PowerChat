@@ -1,5 +1,6 @@
 package com.serhohuk.powerchat.data
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
@@ -18,5 +19,25 @@ data class Message(
     var deliveryTime: Date?=null,
     @ServerTimestamp
     var seenTime: Date?=null)
+{
+
+    companion object{
+        fun convertToMessage(map : Map<String,Any>) : Message{
+            val deliveryTime = (map["deliveryTime"] as Timestamp?)?.seconds?.times(1000) ?:
+            (map["createdAt"] as Timestamp?)!!.seconds*1000
+            return Message(
+                id = map["id"].toString(),
+                from = map["from"].toString(),
+                to= map["to"].toString(),
+                createdAt = Date((map["createdAt"] as Timestamp?)!!.seconds*1000),
+                type = "text",
+                status = 1,
+                textMessage = TextMessage(text = (map["textMessage"] as Map<*, *>)["text"].toString()),
+                deliveryTime = Date(deliveryTime),
+                seenTime = Date(deliveryTime)
+            )
+        }
+    }
+}
 
 data class TextMessage(val text: String)

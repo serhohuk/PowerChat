@@ -9,8 +9,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
+import com.serhohuk.powerchat.data.Message
 import com.serhohuk.powerchat.data.PowerAccount
 import com.serhohuk.powerchat.repository.AppRepository
+import com.serhohuk.powerchat.utils.MessageAdded
 import java.util.*
 
 class MainViewModel(private val repository: AppRepository) : ViewModel() {

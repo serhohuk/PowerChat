@@ -19,6 +19,8 @@ class MessageSender(private val msgCollection: CollectionReference,
                     private val chatUser: PowerAccount,
                     private val listener: OnMessageResponse) {
 
+    var msg : Message?=null
+
     fun checkAndSend(fromUser: String, toUser: String, message: Message) {
         msgCollection.document("${fromUser}_${toUser}").get()
             .addOnSuccessListener { documentSnapshot->
@@ -39,7 +41,6 @@ class MessageSender(private val msgCollection: CollectionReference,
     private fun send(doc: String, message: Message){
         msgCollection.document(doc).set(Dialog(true))
         try {
-            chatUser.id=doc
             message.status=1
             msgCollection.document(doc).collection("messages").document(message.createdAt.toString()).set(
                 message,
@@ -47,6 +48,7 @@ class MessageSender(private val msgCollection: CollectionReference,
             ).addOnSuccessListener {
                 Log.d(TAG,"Message sender Success ${message.createdAt}")
                 listener.onSuccess(message)
+                msg = message
             }.addOnFailureListener {
                 message.status=4
                 Log.d(TAG,"Message sender Failed ${it.message}")

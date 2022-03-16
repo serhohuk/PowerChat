@@ -30,6 +30,21 @@ data class PowerAccount(
                 null,
                 null)
         }
+
+        fun convertToAccount(map : Map<String, Any>) : PowerAccount{
+            return PowerAccount(
+                displayName = map["displayName"].toString(),
+                familyName = map["familyName"].toString(),
+                givenName = map["givenName"].toString(),
+                email = map["email"].toString(),
+                idToken = map["idToken"].toString(),
+                id = map["id"].toString(),
+                photoUri = map["photoUri"].toString(),
+                authCode = map["authCode"].toString(),
+                isExpired = map["isExpired"] as Boolean?
+            )
+        }
+
     }
 
 }

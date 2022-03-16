@@ -16,6 +16,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -39,6 +40,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Destination
 @Composable
@@ -57,10 +59,7 @@ fun SearchUserScreen(navigator : DestinationsNavigator){
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = colorResource(id = R.color.main_color),
-        bottomBar = {
-            MyBottomBar(navigator,index = 1)
-        }
+        backgroundColor = colorResource(id = R.color.main_color)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -105,7 +104,7 @@ fun SearchUserScreen(navigator : DestinationsNavigator){
                     items(it){ value->
                         UserCard(
                         navigator = navigator,
-                        account = convertToAccount(value)
+                        account = PowerAccount.convertToAccount(value)
                         )
                     }
                 }
@@ -116,6 +115,7 @@ fun SearchUserScreen(navigator : DestinationsNavigator){
 
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
 fun UserCard(navigator: DestinationsNavigator, account : PowerAccount){
@@ -148,16 +148,3 @@ fun UserCard(navigator: DestinationsNavigator, account : PowerAccount){
     }
 }
 
-fun convertToAccount(map : Map<String, Any>) : PowerAccount{
-    return PowerAccount(
-        displayName = map["displayName"].toString(),
-        familyName = map["familyName"].toString(),
-        givenName = map["givenName"].toString(),
-        email = map["email"].toString(),
-        idToken = map["idToken"].toString(),
-        id = map["id"].toString(),
-        photoUri = map["photoUri"].toString(),
-        authCode = map["authCode"].toString(),
-        isExpired = map["isExpired"] as Boolean?
-    )
-}

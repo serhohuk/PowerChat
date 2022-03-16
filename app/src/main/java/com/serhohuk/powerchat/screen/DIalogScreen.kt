@@ -1,34 +1,52 @@
 package com.serhohuk.powerchat.screen
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+
+import android.util.Log
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.serhohuk.powerchat.R
+import com.serhohuk.powerchat.api.DialogsGetter
+import com.serhohuk.powerchat.api.DialogsList
+import com.serhohuk.powerchat.api.FirebaseUtils
 import com.serhohuk.powerchat.data.PowerAccount
 import com.serhohuk.powerchat.data.SharedPrefsStorage.Companion.ACCOUNT_ID_STRING
 import com.serhohuk.powerchat.data.SharedPrefsStorage.Companion.IS_FIRST_LOGIN
 import com.serhohuk.powerchat.data.SharedPrefsStorage.Companion.POWER_ACCOUNT_CLASS
 import com.serhohuk.powerchat.screen.destinations.DialogScreenDestination
+import com.serhohuk.powerchat.screen.destinations.MessageScreenDestination
 import com.serhohuk.powerchat.screen.destinations.SearchUserScreenDestination
 import com.serhohuk.powerchat.viewmodel.MainViewModel
+import com.skydoves.landscapist.coil.CoilImage
 import org.koin.androidx.compose.viewModel
 
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Destination
 @Composable
@@ -50,6 +68,28 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
     )
     val viewModel : MainViewModel by viewModel<MainViewModel>()
 
+    val dialogs = remember{
+        mutableStateOf(listOf<PowerAccount>())
+    }
+
+    val dialogsList = DialogsList(
+        viewModel.getDbCollection("Users"),
+        viewModel.getDbCollection("Dialogs"),
+        viewModel.getAccountId(),
+        object : DialogsGetter{
+            override fun onSuccess(list: List<PowerAccount>) {
+                dialogs.value = list
+            }
+
+            override fun onError(msg: String) {
+                Log.e("dialog_screen", msg)
+            }
+
+        }
+    )
+
+    dialogsList.getCompanionsId()
+
     if (viewModel.getIsFirstLogin()){
         viewModel.saveString(ACCOUNT_ID_STRING, powerAccount.id?: "empty")
         viewModel.saveAccountInFirebase(powerAccount)
@@ -60,7 +100,7 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
         powerAccount = viewModel.getPowerAccount()
     }
 
-    viewModel.getAccountByIdInFirebase(viewModel.getAccountId())
+    //viewModel.getAccountByIdInFirebase(viewModel.getAccountId())
     
     Scaffold(modifier = Modifier.fillMaxSize(),
     topBar = {
@@ -72,35 +112,33 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
                     color = Color.White,
                     fontSize = 20.sp
                 )
-            },
-//            actions = {
-//                IconButton(onClick = {
-//
-//                }) {
-//                    Icon(Icons.Filled.Search, contentDescription = "Search",
-//                    tint = Color.White)
-//                }
-//                IconButton(onClick = {
-//
-//                }) {
-//                    Icon(Icons.Filled.Logout, contentDescription = "Log Out",
-//                    tint= Color.White)
-//                }
-//            }
+            }
         )
     },
     backgroundColor = colorResource(id = R.color.main_color),
-    bottomBar = {
-        MyBottomBar(navigator,index = 0)
-    }
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            
+    floatingActionButton = {
+        FloatingActionButton(onClick = {
+            navigator.navigate(SearchUserScreenDestination)
+        }, backgroundColor = Color.Black) {
+            Icon(Icons.Filled.Edit,"",tint= colorResource(id = R.color.white))
         }
-        
+    },
+        drawerContent = {
+            Text("Power Chat", modifier = Modifier.padding(16.dp))
+            Divider()
+        }
+    ) {
+        LazyColumn(){
+            items(dialogs.value){ dialog->
+                DialogMessages(
+                    navigator, dialog
+                )
+            }
+        }
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
 fun MyBottomBar(navigator: DestinationsNavigator,index : Int){
@@ -149,4 +187,43 @@ fun MyBottomBar(navigator: DestinationsNavigator,index : Int){
             }, unselectedContentColor = Color.Gray, selectedContentColor = Color.White
         )
     }
+}
+
+@ExperimentalMaterialApi
+@ExperimentalComposeUiApi
+@Composable
+fun DialogMessages(navigator: DestinationsNavigator, account: PowerAccount){
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .height(60.dp),
+        shape= RectangleShape,
+        onClick = {
+            navigator.navigate(MessageScreenDestination(account = account))
+        },
+        backgroundColor = Color.LightGray
+    ) {
+        Row(modifier= Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(48.dp),
+                shape = CircleShape,
+                elevation = 2.dp
+            ) {
+                CoilImage(
+                    modifier= Modifier.fillMaxSize(),
+                    imageModel = FirebaseUtils.BASE_GOOGLE_ACCOUNT_PHOTO_URL + account.photoUri,
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Text(
+                text = account.givenName.toString(),
+                fontSize = 25.sp, color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+
 }
