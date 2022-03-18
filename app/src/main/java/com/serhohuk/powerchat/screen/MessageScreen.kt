@@ -197,9 +197,10 @@ fun MessageScreen(navigator: DestinationsNavigator, account : PowerAccount){
             .fillMaxWidth()
             .fillMaxHeight(0.9f),
             contentPadding = PaddingValues(vertical=10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            reverseLayout = true
         ){
-            items(messages){ message->
+            items(messages.reversed()){ message->
                 if(from.value){
                     if(message.from==viewModel.getAccountId()){
                         MyMessage(msg = message.textMessage.text, time =message.deliveryTime!!.dateToString("HH:mm"))
