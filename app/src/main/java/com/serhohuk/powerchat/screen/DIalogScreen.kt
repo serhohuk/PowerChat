@@ -1,33 +1,37 @@
 package com.serhohuk.powerchat.screen
 
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-
-import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.serhohuk.powerchat.R
@@ -43,6 +47,7 @@ import com.serhohuk.powerchat.screen.destinations.MessageScreenDestination
 import com.serhohuk.powerchat.screen.destinations.SearchUserScreenDestination
 import com.serhohuk.powerchat.viewmodel.MainViewModel
 import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 
 
@@ -53,7 +58,12 @@ import org.koin.androidx.compose.viewModel
 fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount){
     //navigator.clearBackStack(LoginScreenDestination.route)
 
-    //val selectedIndex = remember { mutableStateOf(0) }
+    val state = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+
+    val interactionSource = remember { MutableInteractionSource() }
     
     var powerAccount = PowerAccount(
         displayName = account.displayName,
@@ -102,7 +112,7 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
 
     //viewModel.getAccountByIdInFirebase(viewModel.getAccountId())
     
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(modifier = Modifier.fillMaxSize(),scaffoldState = state,
     topBar = {
         TopAppBar(
             backgroundColor = Color.Black,
@@ -112,6 +122,19 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
                     color = Color.White,
                     fontSize = 20.sp
                 )
+            },
+            navigationIcon = {
+                IconButton(onClick = {
+                    scope.launch {
+                        with(state.drawerState){
+                            if(isClosed) open() else close()
+                        }
+                    }
+                }) {
+                    Icon(
+                        Icons.Filled.Menu, contentDescription = "Menu",
+                        tint = Color.White)
+                }
             }
         )
     },
@@ -124,7 +147,12 @@ fun DialogScreen(navigator : DestinationsNavigator, account: GoogleSignInAccount
         }
     },
         drawerContent = {
-            Text("Power Chat", modifier = Modifier.padding(16.dp))
+            Text("Log out", modifier = Modifier.fillMaxWidth().height(50.dp)
+                .padding(16.dp)
+                .clickable(interactionSource = interactionSource, indication = null){
+                    Toast.makeText(context, "WORK", Toast.LENGTH_SHORT)
+                        .show()
+                })
             Divider()
         }
     ) {
@@ -226,4 +254,14 @@ fun DialogMessages(navigator: DestinationsNavigator, account: PowerAccount){
         }
     }
 
+}
+
+private fun getGoogleLoginAuth(context : Context): GoogleSignInClient {
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .requestIdToken(context.getString(R.string.default_web_client_id))
+        .requestId()
+        .requestProfile()
+        .build()
+    return GoogleSignIn.getClient(context, gso)
 }
